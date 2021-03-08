@@ -21,13 +21,9 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 import scipy.stats as st
 import seaborn as sb
 from astropy import constants as const
-import random
 import astropy.constants as const
-import math
 from tqdm import tqdm
 import extinction as ex
-import pdb
-import glob
 import scipy.optimize as optimization
 from matplotlib.animation import FuncAnimation
 
