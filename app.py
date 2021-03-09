@@ -6,9 +6,9 @@
 
 import accretion as a
 import accretion_objects as objects
-from importlib import reload
-reload(a)
-reload(objects)
+#from importlib import reload
+#reload(a)
+#reload(objects)
 
 
 # In[ ]:
@@ -17,7 +17,7 @@ reload(objects)
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-get_ipython().run_line_magic('matplotlib', 'inline')
+#get_ipython().run_line_magic('matplotlib', 'inline')
 import scipy.stats as st
 import seaborn as sb
 from astropy import constants as const
@@ -443,7 +443,7 @@ def update_residuals(age_scatter, SpTy_uncertainty, distance_uncertainty, age_un
     return residual_fig
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
     
 
 
