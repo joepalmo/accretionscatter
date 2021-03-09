@@ -145,7 +145,6 @@ def build_figure(observed,df):
 
 
 fig = build_figure(n.observed,df)
-fig
 
 
 # In[ ]:
@@ -231,7 +230,6 @@ def build_residuals(observed, df):
 
 
 residual_fig = build_residuals(n.observed, df)
-residual_fig
 
 
 # In[ ]:
