@@ -440,7 +440,7 @@ def update_residuals(age_scatter, SpTy_uncertainty, distance_uncertainty, age_un
     return residual_fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
     
 
 
