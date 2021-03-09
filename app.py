@@ -37,7 +37,6 @@ import plotly.offline as pyo
 import plotly.express as px
 import plotly.graph_objs as go
 import plotly.tools as tls
-pyo.init_notebook_mode(connected=True)
 
 
 # In[ ]:
