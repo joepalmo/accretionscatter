@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
-
+# In[1]:
 
 import accretion as a
 import accretion_objects as objects
@@ -11,7 +10,7 @@ import accretion_objects as objects
 #reload(objects)
 
 
-# In[ ]:
+# In[2]:
 
 
 import numpy as np
@@ -21,9 +20,13 @@ import matplotlib.pyplot as plt
 import scipy.stats as st
 import seaborn as sb
 from astropy import constants as const
+import random
 import astropy.constants as const
+import math
 from tqdm import tqdm
 import extinction as ex
+import pdb
+import glob
 import scipy.optimize as optimization
 from matplotlib.animation import FuncAnimation
 
@@ -38,8 +41,7 @@ import plotly.express as px
 import plotly.graph_objs as go
 import plotly.tools as tls
 
-
-# In[ ]:
+# In[3]:
 
 
 observed1 = pd.read_csv('accdb_updated.csv')
@@ -47,7 +49,7 @@ observed1['Upper Limit'] = observed1['Upper Limit'].fillna('No')
 nolimit = observed1[observed1['Upper Limit']=='No']
 
 
-# In[ ]:
+# In[4]:
 
 
 n = objects.AccretionDistribution(nolimit)
@@ -56,13 +58,13 @@ n.UVExcessErrorProp(0, 0, 0, 0, 3, 0, 0, 1, variability=0, age_scatter=False)
 df = n.create_df()
 
 
-# In[ ]:
+# In[5]:
 
 
 #df
 
 
-# In[ ]:
+# In[6]:
 
 
 def build_figure(observed,df):
@@ -140,13 +142,13 @@ def build_figure(observed,df):
     return fig
 
 
-# In[ ]:
+# In[7]:
 
 
 fig = build_figure(n.observed,df)
 
 
-# In[ ]:
+# In[8]:
 
 
 def build_residuals(observed, df):
@@ -225,19 +227,19 @@ def build_residuals(observed, df):
     return residual_fig
 
 
-# In[ ]:
+# In[9]:
 
 
 residual_fig = build_residuals(n.observed, df)
 
 
-# In[ ]:
+# In[10]:
 
 
 # current accretion distribution object: n
 
 
-# In[ ]:
+# In[11]:
 
 
 import dash
@@ -273,7 +275,7 @@ app.layout = html.Div(children=[
             html.Center(children=[
             html.H3("Uncertainties", style={"text-decoration": "underline"}, ),    
             ]),
-                
+        
             html.H5("Age Scatter:", style={"font-size": "20px", 'width': '30%', 'display': 'inline-block'}, ),
             html.Div([
             dcc.Dropdown(
@@ -281,6 +283,15 @@ app.layout = html.Div(children=[
                 options=[{'label': i, 'value': i} for i in ['Age Scatter On', 'Age Scatter Off']],
                 value='Age Scatter Off'
             )], style={'width': '68%', 'display': 'inline-block'}),
+            
+            #Input for variability
+            html.H5("Variability (dex):", style={"font-size": "20px", 'width': '80%', 'display': 'inline-block'}, ),
+            html.Div([
+            dcc.Input(
+                id='variability',
+                type='number',
+                value=0.0
+            )], style={'width': '5%', 'display': 'inline-block'}),
         
             #Input for spec type uncertainty
             html.H5("Spectral Type Uncertainty (subclasses):", style={"font-size": "20px", 'width': '80%', 'display': 'inline-block'}, ),
@@ -381,6 +392,7 @@ app.layout = html.Div(children=[
 #Update Figure with the age_scatter input
 @app.callback(
     Output('MC', 'figure'),
+    Input('variability', 'value'),
     Input('age_scatter', 'value'),
     Input('SpTy_uncertainty', 'value'),
     Input('distance_uncertainty', 'value'),
@@ -389,16 +401,16 @@ app.layout = html.Div(children=[
     Input('bc_uncertainty', 'value'),
     Input('observable_uncertainty', 'value'),
     Input('Rin_uncertainty', 'value'),)
-def update_figure(age_scatter, SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty,
+def update_figure(variability, age_scatter, SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty,
                   bc_uncertainty, observable_uncertainty, Rin_uncertainty):
     
     #n = objects.AccretionDistribution(nolimit)
     #n.bootstrap()
     
     if age_scatter == 'Age Scatter On':
-        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=0, age_scatter=True)
+        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=variability, age_scatter=True)
     else:
-        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=0, age_scatter=False)
+        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=variability, age_scatter=False)
         
     df = n.create_df()
     
@@ -412,6 +424,7 @@ def update_figure(age_scatter, SpTy_uncertainty, distance_uncertainty, age_uncer
 
 @app.callback(
     Output('residual', 'figure'),
+    Input('variability', 'value'),
     Input('age_scatter', 'value'),
     Input('SpTy_uncertainty', 'value'),
     Input('distance_uncertainty', 'value'),
@@ -420,16 +433,16 @@ def update_figure(age_scatter, SpTy_uncertainty, distance_uncertainty, age_uncer
     Input('bc_uncertainty', 'value'),
     Input('observable_uncertainty', 'value'),
     Input('Rin_uncertainty', 'value'),)
-def update_residuals(age_scatter, SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty,
+def update_residuals(variability, age_scatter, SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty,
                   bc_uncertainty, observable_uncertainty, Rin_uncertainty):
     
     #n = objects.AccretionDistribution(nolimit)
     #n.bootstrap()
     
     if age_scatter == 'Age Scatter On':
-        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=0, age_scatter=True)
+        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=variability, age_scatter=True)
     else:
-        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=0, age_scatter=False)
+        n.UVExcessErrorProp(SpTy_uncertainty, distance_uncertainty, age_uncertainty, Av_uncertainty, 3, bc_uncertainty, observable_uncertainty, 1, RinUnc=Rin_uncertainty, variability=variability, age_scatter=False)
        
     df = n.create_df()
     
